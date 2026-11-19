@@ -13,8 +13,13 @@ def _base_opts():
         "retries": 10,
         "fragment_retries": 10,
         "socket_timeout": 30,
-        # FORCE iOS CLIENT: This usually bypasses the 360p server limit
-        "extractor_args": {"youtube": {"player_client": ["ios"]}}
+        # Use web and android. This is the safest combo for servers.
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["web", "android"],
+                "skip": ["dash", "hls"] 
+            }
+        }
     }
     
     cookies = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -27,30 +32,35 @@ def probe_formats(url):
     opts = _base_opts()
     opts["skip_download"] = True
 
-    with yt_dlp.YoutubeDL(opts) as ydl:
-        info = ydl.extract_info(url, download=False)
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url, download=False)
 
-    formats = []
-    seen = set()
-    for f in info.get("formats", []):
-        h = f.get("height")
-        if h and f.get("vcodec") not in (None, "none") and h not in seen:
-            seen.add(h)
-            formats.append({
-                "height": h,
-                "ext": f.get("ext"),
-                "filesize": f.get("filesize"),
-                "fps": f.get("fps"),
-            })
+        formats = []
+        seen = set()
+        for f in info.get("formats", []):
+            h = f.get("height")
+            if h and f.get("vcodec") not in (None, "none") and h not in seen:
+                seen.add(h)
+                formats.append({
+                    "height": h,
+                    "ext": f.get("ext"),
+                    "filesize": f.get("filesize"),
+                    "fps": f.get("fps"),
+                })
 
-    formats.sort(key=lambda x: x["height"], reverse=True)
-    
-    return {
-        "title": info.get("title"),
-        "duration": info.get("duration"),
-        "thumbnail": info.get("thumbnail"),
-        "formats": formats,
-    }
+        formats.sort(key=lambda x: x["height"], reverse=True)
+        
+        return {
+            "title": info.get("title"),
+            "duration": info.get("duration"),
+            "thumbnail": info.get("thumbnail"),
+            "formats": formats,
+        }
+    except Exception as e:
+        # If it fails, print the error to the log so we can see it
+        print(f"Error probing formats: {e}")
+        raise e
 
 def download_media(url, mode, resolution, progress_cb=None):
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
