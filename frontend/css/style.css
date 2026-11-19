@@ -1,0 +1,96 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 24px;
+}
+.card {
+  width: 100%;
+  max-width: 560px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+h1 { margin: 0 0 4px; font-size: 1.5rem; }
+.sub { margin: 0 0 22px; color: #94a3b8; font-size: .9rem; }
+
+label { display: block; margin: 14px 0 6px; font-size: .85rem; color: #cbd5e1; }
+input, select {
+  width: 100%;
+  padding: 11px 12px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  font-size: .95rem;
+}
+input:focus, select:focus { outline: none; border-color: #3b82f6; }
+
+.row { display: flex; gap: 12px; margin-top: 16px; }
+.col { flex: 1; }
+.col label { margin-top: 0; }
+
+button {
+  flex: 1;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: .95rem;
+  cursor: pointer;
+  background: #3b82f6;
+  color: white;
+  transition: filter .15s;
+}
+button.secondary { background: #334155; }
+button:hover:not(:disabled) { filter: brightness(1.12); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Job List Styles */
+.jobs { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+.job-card {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 0.9rem;
+}
+.job-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; }
+.job-title { 
+  max-width: 70%; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+.job-status { color: #94a3b8; font-weight: normal; font-size: 0.85rem; text-align: right; }
+.job-status.error { color: #f87171; }
+
+.job-progress-wrap { 
+  height: 6px; 
+  background: #1e293b; 
+  border-radius: 999px; 
+  overflow: hidden; 
+  margin-bottom: 12px; 
+}
+.job-progress-bar { 
+  height: 100%; 
+  width: 0%; 
+  background: linear-gradient(90deg, #3b82f6, #22d3ee); 
+  transition: width .3s ease; 
+}
+
+.job-download { 
+  display: inline-block; 
+  color: #22c55e; 
+  text-decoration: none; 
+  font-weight: 700; 
+  margin-top: 4px; 
+}
+.job-download:hover { filter: brightness(1.1); }
