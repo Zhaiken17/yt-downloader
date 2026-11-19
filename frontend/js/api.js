@@ -1,5 +1,5 @@
-// Change this to your Hugging Face URL after deploying the backend.
-export const API = "http://localhost:7860";
+// Point this to your live Render backend
+export const API = "https://youtube-video-downloader-cmpg.onrender.com";
 
 async function post(path, body) {
   const res = await fetch(`${API}${path}`, {
