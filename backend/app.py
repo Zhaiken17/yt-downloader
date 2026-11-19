@@ -7,13 +7,15 @@ from config import DOWNLOAD_DIR, JOB_TTL_SECONDS, PORT
 from jobs import start_job, jobs
 from downloader import probe_formats
 
-# Create cookies file from Environment Variable if it exists (for Render deployment)
-if os.environ.get("YT_COOKIES"):
-    with open(os.path.join(os.path.dirname(__file__), "cookies.txt"), "w") as f:
-        f.write(os.environ["YT_COOKIES"])
-
 app = Flask(__name__)
 CORS(app)
+
+# --- 1. Handle Cookies for Render ---
+# We save the cookies to a file inside the app directory so yt-dlp can find it
+COOKIE_FILE_PATH = os.path.join(os.path.dirname(__file__), "cookies.txt")
+if os.environ.get("YT_COOKIES"):
+    with open(COOKIE_FILE_PATH, "w") as f:
+        f.write(os.environ["YT_COOKIES"])
 
 @app.get("/")
 def health():
@@ -52,7 +54,7 @@ def status(job_id):
         "status": j["status"],
         "progress": j["progress"],
         "error": j["error"],
-        "title": j.get("title", "Fetching title..."), # Send title to frontend
+        "title": j.get("title", "Fetching title..."),
     })
 
 @app.get("/api/file/<job_id>")
@@ -63,7 +65,6 @@ def file(job_id):
     if not os.path.exists(j["filepath"]):
         abort(404)
     
-    # as_attachment=True forces the browser to download the file
     return send_file(j["filepath"], as_attachment=True)
 
 def _cleaner():
@@ -82,7 +83,8 @@ def _cleaner():
 
 if __name__ == "__main__":
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+    # Start the background cleanup thread
     threading.Thread(target=_cleaner, daemon=True).start()
     
+    # Run Flask
     app.run(host="0.0.0.0", port=PORT)
-    
