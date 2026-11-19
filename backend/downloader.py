@@ -13,8 +13,8 @@ def _base_opts():
         "retries": 10,
         "fragment_retries": 10,
         "socket_timeout": 30,
-        # Force yt-dlp to extract all formats, including premium ones
-        "extractor_args": {"youtube": {"player_client": ["web", "android"]}}
+        # FORCE iOS CLIENT: This usually bypasses the 360p server limit
+        "extractor_args": {"youtube": {"player_client": ["ios"]}}
     }
     
     cookies = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -34,7 +34,6 @@ def probe_formats(url):
     seen = set()
     for f in info.get("formats", []):
         h = f.get("height")
-        # Grab all video formats that have a height (resolution)
         if h and f.get("vcodec") not in (None, "none") and h not in seen:
             seen.add(h)
             formats.append({
@@ -46,7 +45,6 @@ def probe_formats(url):
 
     formats.sort(key=lambda x: x["height"], reverse=True)
     
-    # Sort them descending (1440, 1080, 720, etc.)
     return {
         "title": info.get("title"),
         "duration": info.get("duration"),
@@ -73,7 +71,6 @@ def download_media(url, mode, resolution, progress_cb=None):
             }],
         }
     else:
-        # This format string tells yt-dlp: get the best video up to the selected resolution + the best audio
         fmt = (
             f"bestvideo[height<={resolution}]+bestaudio/best"
             if str(resolution) != "best"
