@@ -9,15 +9,17 @@ def _base_opts():
         "quiet": True,
         "noplaylist": True,
         "js_runtimes": JS_RUNTIMES,
-        "retries": 20,
-        "fragment_retries": 20,
+        # This tells yt-dlp to download the challenge solver from GitHub
+        "remote_components": ["ejs:github"],
+        "retries": 10,
+        "fragment_retries": 10,
         "socket_timeout": 30,
-        "http_chunk_size": 10485760,
     }
-    # Check for cookies in the current directory
+    
     cookies = os.path.join(os.path.dirname(__file__), "cookies.txt")
     if os.path.exists(cookies):
         opts["cookiefile"] = cookies
+        
     return opts
 
 def probe_formats(url):
