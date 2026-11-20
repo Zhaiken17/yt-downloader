@@ -10,12 +10,12 @@ from downloader import probe_formats
 app = Flask(__name__)
 CORS(app)
 
-# --- 1. Handle Cookies for Render ---
-# We save the cookies to a file inside the app directory so yt-dlp can find it
+# --- 1. Handle Cookies for Render Perfectly ---
 COOKIE_FILE_PATH = os.path.join(os.path.dirname(__file__), "cookies.txt")
 if os.environ.get("YT_COOKIES"):
-    with open(COOKIE_FILE_PATH, "w") as f:
-        f.write(os.environ["YT_COOKIES"])
+    # Write the file, stripping any accidental Windows \r\n formatting issues
+    with open(COOKIE_FILE_PATH, "w", encoding="utf-8", newline="") as f:
+        f.write(os.environ["YT_COOKIES"].strip())
 
 @app.get("/")
 def health():
@@ -68,9 +68,8 @@ def file(job_id):
     return send_file(j["filepath"], as_attachment=True)
 
 def _cleaner():
-    """Background thread to delete old files so the disk doesn't fill up."""
     while True:
-        time.sleep(300) # Check every 5 minutes
+        time.sleep(300) 
         now = time.time()
         for jid, j in list(jobs.items()):
             fp = j.get("filepath")
@@ -83,8 +82,5 @@ def _cleaner():
 
 if __name__ == "__main__":
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-    # Start the background cleanup thread
     threading.Thread(target=_cleaner, daemon=True).start()
-    
-    # Run Flask
     app.run(host="0.0.0.0", port=PORT)

@@ -9,10 +9,10 @@ def _base_opts():
         "retries": 10,
         "fragment_retries": 10,
         "socket_timeout": 30,
-        # Force the mweb client to bypass the 360p datacenter limit
+        # Force android client to bypass bot checks
         "extractor_args": {
             "youtube": {
-                "player_client": ["mweb"]
+                "player_client": ["android"]
             }
         }
     }
@@ -31,22 +31,18 @@ def probe_formats(url):
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
     except Exception as e:
-        print(f"Error in probe_formats: {e}")
+        print(f"Error probing formats: {e}")
         raise e
 
     formats = []
     seen = set()
-    
-    # Use .get() to prevent crashes if YouTube returns weird data
     for f in info.get("formats", []):
         h = f.get("height")
-        # Check if height exists and vcodec is not None
         if h and f.get("vcodec") not in (None, "none") and h not in seen:
             seen.add(h)
             formats.append({
                 "height": h,
                 "ext": f.get("ext", "mp4"),
-                # Convert filesize to int or 0 if None to prevent frontend crashes
                 "filesize": int(f.get("filesize") or 0), 
                 "fps": f.get("fps"),
             })
