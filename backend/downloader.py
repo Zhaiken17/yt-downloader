@@ -9,14 +9,6 @@ def _base_opts():
         "retries": 10,
         "fragment_retries": 10,
         "socket_timeout": 30,
-        # The 'tv' client bypasses most datacenter IP blocks
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["tv"]
-            }
-        },
-        # Tell yt-dlp to ignore broken formats and try the next one
-        "ignoreerrors": True,
     }
     
     cookies = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -34,7 +26,11 @@ def probe_formats(url):
             info = ydl.extract_info(url, download=False)
     except Exception as e:
         print(f"Error probing formats: {e}")
-        raise e
+        raise Exception(f"yt-dlp error: {str(e)}")
+
+    # SAFETY CHECK: Prevent the NoneType crash
+    if not info:
+        raise Exception("yt-dlp returned no data. Video might be blocked, private, or age-restricted.")
 
     formats = []
     seen = set()
