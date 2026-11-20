@@ -9,12 +9,14 @@ def _base_opts():
         "retries": 10,
         "fragment_retries": 10,
         "socket_timeout": 30,
-        # Force android client to bypass bot checks
+        # The 'tv' client bypasses most datacenter IP blocks
         "extractor_args": {
             "youtube": {
-                "player_client": ["android"]
+                "player_client": ["tv"]
             }
-        }
+        },
+        # Tell yt-dlp to ignore broken formats and try the next one
+        "ignoreerrors": True,
     }
     
     cookies = os.path.join(os.path.dirname(__file__), "cookies.txt")
