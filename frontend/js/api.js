@@ -1,15 +1,27 @@
-// Point this to your live Render backend
 export const API = "https://youtube-video-downloader-cmpg.onrender.com";
 
 async function post(path, body) {
-  const res = await fetch(`${API}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-  return data;
+  try {
+    const res = await fetch(`${API}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    
+    // If the server returns an error (like 400 or 500), catch it here
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `Server error: ${res.status}`);
+    }
+    
+    return await res.json();
+  } catch (err) {
+    // This catches network errors (like Render being asleep)
+    if (err.name === "TypeError" && err.message.includes("fetch")) {
+      throw new Error("Backend is waking up (takes 50s) or is offline. Please wait and try again.");
+    }
+    throw err;
+  }
 }
 
 export async function getFormats(url) {

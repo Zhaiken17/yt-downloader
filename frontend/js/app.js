@@ -24,11 +24,19 @@ urlInput.addEventListener("input", () => {
   debounceTimer = setTimeout(async () => {
     try {
       const data = await getFormats(url);
+      
+      // Defensive check: If the backend returns no formats, show an error
+      if (!data.formats || data.formats.length === 0) {
+        formatSel.innerHTML = "<option>No video formats found</option>";
+        return;
+      }
+      
       currentFormats = data.formats;
       renderSelects();
       goBtn.disabled = false;
     } catch (err) {
-      formatSel.innerHTML = "<option>Error loading</option>";
+      // Show the actual error message from api.js
+      formatSel.innerHTML = `<option>${err.message}</option>`;
     }
   }, 800);
 });
@@ -60,7 +68,6 @@ goBtn.addEventListener("click", async () => {
 
     createJobCard(job_id, url);
     
-    // Reset form immediately so you can paste the next one
     urlInput.value = "";
     formatSel.innerHTML = "<option>Paste a link first…</option>";
     formatSel.disabled = true;
@@ -116,22 +123,11 @@ function createJobCard(jobId, url) {
         statusEl.textContent = `Waiting in queue…`;
       } else if (s.status === "done") {
         clearInterval(timer);
-        statusEl.textContent = "Done! Check your browser downloads.";
+        statusEl.textContent = "Ready to save!";
         statusEl.style.color = "#22c55e";
+        
         wrapEl.style.display = "none";
-        
-        // --- THIS IS THE MAGIC PART ---
-        // It creates an invisible link, clicks it, and Chrome catches it.
-        const fileLink = fileUrl(jobId);
-        const a = document.createElement('a');
-        a.href = fileLink;
-        a.download = ''; // tells browser to download instead of navigate
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        
-        // Keep a backup link in the UI just in case it fails
-        actionEl.innerHTML = `<a class="job-download" href="${fileLink}">⬇ Save manually</a>`;
+        actionEl.innerHTML = `<a class="job-download" href="${fileUrl(jobId)}">⬇ Save to device</a>`;
       } else if (s.status === "error") {
         clearInterval(timer);
         statusEl.textContent = `Error: ${s.error}`;
@@ -140,7 +136,7 @@ function createJobCard(jobId, url) {
       }
     } catch (err) {
       clearInterval(timer);
-      statusEl.textContent = `Lost connection`;
+      statusEl.textContent = `Lost connection to server`;
       statusEl.classList.add("error");
     }
   }, 2000);
